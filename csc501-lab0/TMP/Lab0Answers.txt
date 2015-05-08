@@ -1,0 +1,98 @@
+1)           _____________________
+A.       	|	   FREE  	      |
+	        |_____________________| Base pointer: 0x00fffffc
+            |                     |
+		    |	   	              |Stack pointer: 0x00ffff3c
+            |      PROCESS:		  |
+            |       PNULL         |Limit :0x00fff000
+         	|_____________________|Base pointer:0x00ffeff8
+		    |	   	              |
+            |                     |    
+            |Stack   PROCEES:     |
+            |        MAIN         |Stack pointer: 0x00ffefa0
+            |	        	      |
+         	|_____________________|Limit:0x00ffdffc
+            |       Heap          |
+         	|_____________________|end:0x00010a78
+            |	         	      |
+            |       end           |
+         	|_____________________|edata: 0x0000a540
+            |	         	      |
+            |       data          |
+        	|_____________________| etext:0x0000889a
+            |	   	              |
+            |        text         |
+        	|_____________________|0x0
+
+                XINU MEMORY LAYOUT  
+				  
+				  
+				  
+2)Top of the stack address before function call:0x00ffefc0
+  Top of the stack address after function call: 0x00ffefb8
+  This is because when the printos() function is called, the contents of the EIP register which is the return address and the main's stack frame are both pushed
+  onto the stack.
+  
+  |----------| 0x00ffefb8
+  |          |  
+  |    EBP   |
+  |----------| 
+  | Return   |
+  | Address  | 
+  |----------| 0x00ffefc0
+
+
+3)The byte order adopted by the host machine is Little Endian.This is because the lower byte of a 2-byte input is stored in the starting or lower address while 
+  the higher byte is stored in the next address.For example, if the input is 0xaabb ,then according to little endian byte order least significant byte 'bb' will
+  be stored in starting address 'A' and higher byte 'aa' will be stored in the next address 'A+1'.This can be verified by the following program:
+  
+  void define byte_order()
+ {
+ combine {
+	short l;
+	char c[sizeof(short)];
+	} input;
+ input.l = 0xaabb;
+ 
+ if(sizeof(short) == bb) {
+	if(input.c[0] == aa && input.c[1] == bb)
+		printf("big-endian");
+	else if(input.c[0] == bb && input.c[1] == aa)
+		printf("little-endian");
+	else 
+		printf("unknown");
+	}
+ }
+ Reference: http://www.tutorialspoint.com/unix_sockets/network_byte_orders.htm
+
+ 
+4)a) mov- It is a data movement instruction where data can be transferred from second operand in to the location referred by the first operand.The second operand can
+     refer register content,memory or a constant.There can be register to register moves but direct memory to memory moves is not supported.
+     example:
+     mov eax, ebx  stores value of ebx in eax.
+  
+  b) push- This instruction places its operand onto the top of the hardware supported stack in memory. It first decrements ESP by 4, then places its 
+     operand into the contents of the 32-bit location at address [ESP].  ESP (the stack pointer) is decremented by push since the stack grows from high addresses 
+	 to lower addresses.
+	 example
+	 push ebp - places it on top of stack
+
+  c)Pusha- The Pusha instruction like push is used to push memory on the stack but is used when the operand-size attribute is 16 bit.The pushA instruction pushes the value 
+    in the order AX,CX,DX,BX,SP,BP,,SI,DI if their operand size is 16.
+  
+  d) pop - The instruction does the opposite of push instruction.It removes the 4-byte data element from the top of the hardware-supported stack into the specified 
+     operand (i.e. register or memory location). It first moves the 4 bytes located at memory location [SP] into the specified register or memory location,and then 
+	 increments stack pointer by 4.
+	 
+  e) popa- The popa function executes in the same way as pop except that it is used when the operand-size attribute is 16. The popa instruction pops the value in reverse
+     order DI,SI,BP,SP,BX,DX,CX,AX.
+	 
+	 Reference:http://www.cs.virginia.edu/~evans/cs216/guides/x86.html
+	 
+5) No, i am not able to see the local variables declares in the printtos function.It can be viewed only when the compiler optimization is disabled by specifying -oo in 
+   Makefile.The compiler attempts to reduce compilation cost and make debugging produce the expected result by setting -O0.Due to compiler optimization it is possible that 
+   the variables we access using pointer may be moved to different location and we're not able to access them.Compiler optimization compromises the program debugging capability 
+   and compilation time
+	 
+	 Reference: http://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
+  
